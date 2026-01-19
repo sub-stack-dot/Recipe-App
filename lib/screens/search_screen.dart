@@ -4,37 +4,54 @@ import 'package:provider/provider.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/recipe_card.dart';
 import 'favorites_screen.dart';
+import 'home.dart';
 import 'profile_screen.dart';
-import 'search_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  String selectedCategory = 'All';
-  String searchQuery = '';
+class _SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
+  Set<String> selectedFilters = {};
 
-  final List<String> categories = [
-    'All',
-    'Breakfast',
-    'Lunch',
-    'Dinner',
-    'Desserts',
-    'Drinks',
-  ];
+  final List<String> filters = ['Veg', 'Non-Veg', 'Healthy', 'Quick Meals'];
+
+  void toggleFilter(String filter) {
+    setState(() {
+      if (selectedFilters.contains(filter)) {
+        selectedFilters.remove(filter);
+      } else {
+        selectedFilters.add(filter);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final recipeProvider = context.watch<RecipeProvider>();
-    final filteredRecipes = recipeProvider.filtered(
-      category: selectedCategory,
-      query: searchQuery,
-    );
+    final recipes = recipeProvider.recipes;
+
+    final filteredRecipes = recipes.where((recipe) {
+      final searchText = searchController.text.toLowerCase();
+      final matchesSearch =
+          searchText.isEmpty ||
+          recipe.title.toLowerCase().contains(searchText) ||
+          recipe.description.toLowerCase().contains(searchText);
+
+      final hasQuickMeals = recipe.prepTime <= 20;
+      final matchesFilter =
+          selectedFilters.isEmpty ||
+          (selectedFilters.contains('Quick Meals') && hasQuickMeals) ||
+          selectedFilters.contains('Veg') ||
+          selectedFilters.contains('Non-Veg') ||
+          selectedFilters.contains('Healthy');
+
+      return matchesSearch && matchesFilter;
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
@@ -42,91 +59,87 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header section
+            // Header with back button
             Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Discover',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Find your next favorite recipe',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                        ],
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        shape: BoxShape.circle,
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF6B35),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.trending_up,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 24,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Search bar
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[900],
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: TextField(
-                      controller: searchController,
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: 'Search recipes or ingredients',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        border: InputBorder.none,
-                        icon: Icon(Icons.search, color: Colors.grey),
-                      ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Search Recipes',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
             ),
-            // Category filters
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: searchController,
+                  onChanged: (_) => setState(() {}),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: 'Search recipes or ingredients',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: InputBorder.none,
+                    icon: Icon(Icons.search, color: Colors.grey),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Filters section
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'FILTERS',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Filter chips
             SizedBox(
               height: 50,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: categories.length,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: filters.length,
                 itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final isSelected = category == selectedCategory;
+                  final filter = filters[index];
+                  final isSelected = selectedFilters.contains(filter);
                   return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategory = category;
-                        searchQuery = searchController.text;
-                      });
-                    },
+                    onTap: () => toggleFilter(filter),
                     child: Container(
                       margin: const EdgeInsets.only(right: 12),
                       padding: const EdgeInsets.symmetric(
@@ -141,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          category,
+                          filter,
                           style: TextStyle(
                             color: isSelected ? Colors.white : Colors.grey,
                             fontWeight: isSelected
@@ -156,33 +169,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 20),
-            // Popular Recipes header
+            const SizedBox(height: 24),
+            // Results count
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Popular Recipes',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '${filteredRecipes.length} recipes',
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                '${filteredRecipes.length} RESULTS FOUND',
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
             const SizedBox(height: 16),
             // Recipe grid
             Expanded(
               child: GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.75,
@@ -195,7 +200,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   return RecipeCard(
                     recipe: recipe,
                     onTap: () {
-                      // Navigate to recipe detail
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Opening ${recipe.title}'),
@@ -230,31 +234,27 @@ class _HomeScreenState extends State<HomeScreen> {
           type: BottomNavigationBarType.fixed,
           selectedItemColor: const Color(0xFFFF6B35),
           unselectedItemColor: Colors.grey,
-          currentIndex: 0,
+          currentIndex: 1,
           elevation: 0,
           onTap: (index) {
-            print('HomeScreen: Bottom nav tapped, index: $index');
-            if (index == 0) {
+            if (index == 1) {
               return;
             }
 
             Widget? target;
             switch (index) {
-              case 1:
-                target = const SearchScreen();
+              case 0:
+                target = const HomeScreen();
                 break;
               case 2:
-                print('HomeScreen: Navigating to FavoritesScreen');
                 target = const FavoritesScreen();
                 break;
               case 3:
-                print('HomeScreen: Navigating to ProfileScreen');
                 target = const ProfileScreen();
                 break;
             }
 
             if (target != null) {
-              print('HomeScreen: Navigating to ${target.runtimeType}');
               Navigator.pushReplacement(
                 context,
                 PageRouteBuilder(
