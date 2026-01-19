@@ -37,136 +37,165 @@ class _LandingPageState extends State<LandingPage>
   void _navigateToLogin() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GestureDetector(
-        onHorizontalDragEnd: (details) {
-          // Swipe left to go to login
-          if (details.velocity.pixelsPerSecond.dx < -250) {
-            _navigateToLogin();
-          }
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF1A1A1A)
-                    : Colors.white,
-                Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF0E0E0E)
-                    : Colors.grey[100] ?? Colors.grey,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1A1A1A)
+                  : Colors.white,
+              Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF0E0E0E)
+                  : Colors.grey[100] ?? Colors.grey,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Welcome to',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Text(
-                            'Recipe Hub',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF6B35).withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.restaurant,
-                          color: Color(0xFFFF6B35),
-                          size: 24,
-                        ),
-                      ),
-                    ],
-                  ),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
                 ),
-
-                // Featured Recipe Card
-                Expanded(
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                RecipeDetailPage(recipe: currentRecipe),
-                          ),
-                        );
-                      },
-                      child: _buildFeaturedRecipeCard(currentRecipe, context),
-                    ),
-                  ),
-                ),
-
-                // Swipe Indicator
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 40),
-                  child: Center(
-                    child: Column(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ScaleTransition(
-                          scale: Tween(begin: 1.0, end: 1.2)
-                              .animate(_animationController),
-                          child: const Icon(
-                            Icons.arrow_back,
-                            color: Color(0xFFFF6B35),
-                            size: 32,
+                        const Text(
+                          'Welcome to',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
                           ),
                         ),
-                        const SizedBox(height: 8),
                         Text(
-                          'Swipe left to continue',
+                          'Recipe Hub',
                           style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
                           ),
                         ),
                       ],
                     ),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF6B35).withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.restaurant,
+                        color: Color(0xFFFF6B35),
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Featured Recipe Card
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              RecipeDetailPage(recipe: currentRecipe),
+                        ),
+                      );
+                    },
+                    child: _buildFeaturedRecipeCard(currentRecipe, context),
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // Sign Up and Login Buttons
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 40,
+                ),
+                child: Column(
+                  children: [
+                    // Sign Up Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/signup');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6B35),
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shadowColor: const Color(0xFFFF6B35).withOpacity(0.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Login Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFFF6B35),
+                          side: const BorderSide(
+                            color: Color(0xFFFF6B35),
+                            width: 2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -198,9 +227,7 @@ class _LandingPageState extends State<LandingPage>
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: Colors.grey[300],
-                  child: const Center(
-                    child: Icon(Icons.image_not_supported),
-                  ),
+                  child: const Center(child: Icon(Icons.image_not_supported)),
                 );
               },
             ),
@@ -242,10 +269,7 @@ class _LandingPageState extends State<LandingPage>
                     const SizedBox(height: 8),
                     Text(
                       recipe.description,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
-                      ),
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -253,7 +277,10 @@ class _LandingPageState extends State<LandingPage>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildRecipeInfo(Icons.schedule, '${recipe.prepTime} mins'),
+                        _buildRecipeInfo(
+                          Icons.schedule,
+                          '${recipe.prepTime} mins',
+                        ),
                         _buildRecipeInfo(Icons.people, recipe.servings),
                         _buildRecipeInfo(Icons.category, recipe.category),
                       ],
@@ -280,21 +307,10 @@ class _LandingPageState extends State<LandingPage>
   Widget _buildRecipeInfo(IconData icon, String text) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: const Color(0xFFFF6B35),
-          size: 16,
-        ),
+        Icon(icon, color: const Color(0xFFFF6B35), size: 16),
         const SizedBox(width: 6),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
+        Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
       ],
     );
   }
 }
-
