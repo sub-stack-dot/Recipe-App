@@ -24,7 +24,10 @@ class ApiService {
           author: data['author'] ?? '',
           servings: data['servings'] ?? '',
           prepTime: data['prepTime'] ?? 0,
+          cookTime: data['cookTime'] ?? data['prepTime'] ?? 0,
           category: data['category'] ?? '',
+          ingredients: List<String>.from(data['ingredients'] ?? const []),
+          instructions: List<String>.from(data['instructions'] ?? const []),
           isFavorite: false, // Will be set by provider based on user favorites
         );
       }).toList();
@@ -46,7 +49,10 @@ class ApiService {
           author: data['author'] ?? '',
           servings: data['servings'] ?? '',
           prepTime: data['prepTime'] ?? 0,
+          cookTime: data['cookTime'] ?? data['prepTime'] ?? 0,
           category: data['category'] ?? '',
+          ingredients: List<String>.from(data['ingredients'] ?? const []),
+          instructions: List<String>.from(data['instructions'] ?? const []),
           isFavorite: false,
         );
       }).toList();
@@ -69,7 +75,10 @@ class ApiService {
         author: data['author'] ?? '',
         servings: data['servings'] ?? '',
         prepTime: data['prepTime'] ?? 0,
+        cookTime: data['cookTime'] ?? data['prepTime'] ?? 0,
         category: data['category'] ?? '',
+        ingredients: List<String>.from(data['ingredients'] ?? const []),
+        instructions: List<String>.from(data['instructions'] ?? const []),
         isFavorite: false,
       );
     } catch (e) {
@@ -86,6 +95,9 @@ class ApiService {
     required String servings,
     required int prepTime,
     required String category,
+    int? cookTime,
+    List<String>? ingredients,
+    List<String>? instructions,
     String? userId,
   }) async {
     try {
@@ -96,7 +108,10 @@ class ApiService {
         'author': author,
         'servings': servings,
         'prepTime': prepTime,
+        'cookTime': cookTime ?? prepTime,
         'category': category,
+        if (ingredients != null) 'ingredients': ingredients,
+        if (instructions != null) 'instructions': instructions,
         'userId': userId,
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -115,7 +130,10 @@ class ApiService {
     String? imageUrl,
     String? servings,
     int? prepTime,
+    int? cookTime,
     String? category,
+    List<String>? ingredients,
+    List<String>? instructions,
   }) async {
     try {
       final Map<String, dynamic> updates = {};
@@ -125,7 +143,10 @@ class ApiService {
       if (imageUrl != null) updates['imageUrl'] = imageUrl;
       if (servings != null) updates['servings'] = servings;
       if (prepTime != null) updates['prepTime'] = prepTime;
+      if (cookTime != null) updates['cookTime'] = cookTime;
       if (category != null) updates['category'] = category;
+      if (ingredients != null) updates['ingredients'] = ingredients;
+      if (instructions != null) updates['instructions'] = instructions;
 
       if (updates.isNotEmpty) {
         updates['updatedAt'] = FieldValue.serverTimestamp();
@@ -216,7 +237,10 @@ class ApiService {
               author: data['author'] ?? '',
               servings: data['servings'] ?? '',
               prepTime: data['prepTime'] ?? 0,
+              cookTime: data['cookTime'] ?? data['prepTime'] ?? 0,
               category: data['category'] ?? '',
+              ingredients: List<String>.from(data['ingredients'] ?? const []),
+              instructions: List<String>.from(data['instructions'] ?? const []),
               isFavorite: false,
             );
           })
@@ -249,7 +273,10 @@ class ApiService {
           author: data['author'] ?? '',
           servings: data['servings'] ?? '',
           prepTime: data['prepTime'] ?? 0,
+          cookTime: data['cookTime'] ?? data['prepTime'] ?? 0,
           category: data['category'] ?? '',
+          ingredients: List<String>.from(data['ingredients'] ?? const []),
+          instructions: List<String>.from(data['instructions'] ?? const []),
           isFavorite: false,
         );
       }).toList();

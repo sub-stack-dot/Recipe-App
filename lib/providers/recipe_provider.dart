@@ -17,6 +17,7 @@ class RecipeProvider extends ChangeNotifier {
   // Use sample data as fallback or for offline mode
   RecipeProvider() {
     _recipes = SampleRecipes.getRecipes();
+    _applyFavoritesToRecipes();
     loadRecipes();
   }
 
@@ -29,6 +30,8 @@ class RecipeProvider extends ChangeNotifier {
         .where((recipe) => _userFavorites.contains(recipe.recipeID))
         .toList(growable: false);
   }
+
+  bool isRecipeFavorite(String recipeId) => _userFavorites.contains(recipeId);
 
   int get totalRecipes => _recipes.length;
 
@@ -50,6 +53,8 @@ class RecipeProvider extends ChangeNotifier {
       final userId = _authService.currentUserId;
       if (userId != null) {
         await loadUserFavorites(userId);
+      } else {
+        _applyFavoritesToRecipes();
       }
 
       _isLoading = false;
@@ -69,6 +74,7 @@ class RecipeProvider extends ChangeNotifier {
   Future<void> loadUserFavorites(String userId) async {
     try {
       _userFavorites = await _apiService.getUserFavorites(userId);
+      _applyFavoritesToRecipes();
       notifyListeners();
     } catch (e) {
       debugPrint('Failed to load favorites: $e');
@@ -103,6 +109,7 @@ class RecipeProvider extends ChangeNotifier {
         _userFavorites.add(recipeID);
       }
 
+      _applyFavoritesToRecipes();
       notifyListeners();
     } catch (e) {
       debugPrint('Failed to toggle favorite: $e');
@@ -116,8 +123,20 @@ class RecipeProvider extends ChangeNotifier {
     final index = _recipes.indexWhere((recipe) => recipe.recipeID == recipeID);
     if (index == -1) return;
 
-    _recipes[index].isFavorite = !_recipes[index].isFavorite;
+    if (_userFavorites.contains(recipeID)) {
+      _userFavorites.remove(recipeID);
+    } else {
+      _userFavorites.add(recipeID);
+    }
+
+    _applyFavoritesToRecipes();
     notifyListeners();
+  }
+
+  void _applyFavoritesToRecipes() {
+    for (final recipe in _recipes) {
+      recipe.isFavorite = _userFavorites.contains(recipe.recipeID);
+    }
   }
 
   List<Recipe> filtered({String category = 'All', String query = ''}) {

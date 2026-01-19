@@ -6,6 +6,7 @@ import '../widgets/recipe_card.dart';
 import 'favorites_screen.dart';
 import 'profile_screen.dart';
 import 'search_screen.dart';
+import 'recipe_detail.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -195,11 +196,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   return RecipeCard(
                     recipe: recipe,
                     onTap: () {
-                      // Navigate to recipe detail
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Opening ${recipe.title}'),
-                          duration: const Duration(seconds: 1),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => RecipeDetailPage(recipe: recipe),
                         ),
                       );
                     },

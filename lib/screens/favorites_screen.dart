@@ -6,6 +6,7 @@ import '../widgets/recipe_card.dart';
 import 'home.dart';
 import 'profile_screen.dart';
 import 'search_screen.dart';
+import 'recipe_detail.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -148,10 +149,10 @@ class FavoritesScreen extends StatelessWidget {
                       return RecipeCard(
                         recipe: recipe,
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Opening ${recipe.title}'),
-                              duration: const Duration(seconds: 1),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RecipeDetailPage(recipe: recipe),
                             ),
                           );
                         },
