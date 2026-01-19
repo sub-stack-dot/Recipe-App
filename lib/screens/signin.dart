@@ -137,7 +137,50 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 const SizedBox(height: 28),
-                _PrimaryButton(label: 'Create Account', onPressed: () {}),
+                _PrimaryButton(
+                  label: 'Create Account',
+                  onPressed: () {
+                    if (nameController.text.isNotEmpty &&
+                        emailController.text.isNotEmpty &&
+                        passwordController.text.isNotEmpty &&
+                        confirmController.text.isNotEmpty &&
+                        acceptTerms) {
+                      if (passwordController.text == confirmController.text) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Account Created Successfully!'),
+                            backgroundColor: Colors.green,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                        Future.delayed(const Duration(seconds: 1), () {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/home',
+                            (route) => false,
+                          );
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Passwords do not match'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Please fill in all fields and accept terms'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                ),
                 const SizedBox(height: 24),
                 Row(
                   children: [

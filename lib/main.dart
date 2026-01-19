@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/recipe_provider.dart';
+import 'screens/landing.dart';
+import 'screens/login.dart';
+import 'screens/signin.dart';
 import 'screens/home.dart';
 
 void main() {
@@ -20,9 +23,21 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.orange,
           brightness: Brightness.dark,
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          primarySwatch: Colors.orange,
+          brightness: Brightness.dark,
+          useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: const HomeScreen(),
+        home: const LandingPage(),
+        routes: {
+          '/landing': (context) => const LandingPage(),
+          '/login': (context) => const LoginScreen(),
+          '/signup': (context) => const SignUpScreen(),
+          '/home': (context) => const HomeScreen(),
+        },
       ),
     );
   }
