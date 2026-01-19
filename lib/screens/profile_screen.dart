@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/recipe_provider.dart';
+import '../services/auth_service.dart';
 import 'favorites_screen.dart';
 import 'home.dart';
+import 'login.dart';
 import 'search_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -44,6 +46,35 @@ class ProfileScreen extends StatelessWidget {
         reverseTransitionDuration: Duration.zero,
       ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final recipeProvider = context.read<RecipeProvider>();
+
+    try {
+      await AuthService().signOut();
+      recipeProvider.clearFavorites();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Logged out successfully'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -168,10 +199,11 @@ class ProfileScreen extends StatelessWidget {
                 label: 'Settings',
               ),
               const SizedBox(height: 16),
-              const _ProfileOption(
+              _ProfileOption(
                 icon: Icons.logout,
                 iconColor: Color(0xFFFF4436),
                 label: 'Logout',
+                onTap: () => _handleLogout(context),
               ),
             ],
           ),
@@ -253,12 +285,13 @@ class _ProfileOption extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     required this.label,
+    this.onTap,
   });
 
   final IconData icon;
   final Color iconColor;
   final String label;
-  final VoidCallback? onTap = null;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

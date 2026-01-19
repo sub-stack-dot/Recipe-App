@@ -139,6 +139,12 @@ class RecipeProvider extends ChangeNotifier {
     }
   }
 
+  void clearFavorites() {
+    _userFavorites = [];
+    _applyFavoritesToRecipes();
+    notifyListeners();
+  }
+
   List<Recipe> filtered({String category = 'All', String query = ''}) {
     final normalizedCategory = category.trim();
     final normalizedQuery = query.trim().toLowerCase();
