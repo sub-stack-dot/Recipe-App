@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/recipe_provider.dart';
+import '../services/auth_service.dart';
 import 'login.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -17,6 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool obscurePassword = true;
   bool obscureConfirm = true;
   bool acceptTerms = true;
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -139,47 +143,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 28),
                 _PrimaryButton(
                   label: 'Create Account',
-                  onPressed: () {
-                    if (nameController.text.isNotEmpty &&
-                        emailController.text.isNotEmpty &&
-                        passwordController.text.isNotEmpty &&
-                        confirmController.text.isNotEmpty &&
-                        acceptTerms) {
-                      if (passwordController.text == confirmController.text) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Account Created Successfully!'),
-                            backgroundColor: Colors.green,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                        Future.delayed(const Duration(seconds: 1), () {
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            '/home',
-                            (route) => false,
-                          );
-                        });
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Passwords do not match'),
-                            backgroundColor: Colors.red,
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Please fill in all fields and accept terms'),
-                          backgroundColor: Colors.red,
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: _loading ? null : _handleSignUp,
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -262,6 +226,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
     confirmController.dispose();
     super.dispose();
   }
+
+  Future<void> _handleSignUp() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final confirm = confirmController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirm.isEmpty) {
+      _showSnack('Please fill in all fields', Colors.red);
+      return;
+    }
+    if (!acceptTerms) {
+      _showSnack('Please accept the terms', Colors.red);
+      return;
+    }
+    if (password != confirm) {
+      _showSnack('Passwords do not match', Colors.red);
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      final auth = AuthService();
+      final user = await auth.signUpWithEmail(
+        email: email,
+        password: password,
+        name: name,
+      );
+      if (user != null && mounted) {
+        await context.read<RecipeProvider>().loadFavoritesForCurrentUser();
+        _showSnack('Account created!', Colors.green);
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+    } catch (e) {
+      _showSnack(e.toString(), Colors.red);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _showSnack(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 }
 
 class _FrostedField extends StatelessWidget {
@@ -311,7 +324,7 @@ class _PrimaryButton extends StatelessWidget {
   const _PrimaryButton({required this.label, required this.onPressed});
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {

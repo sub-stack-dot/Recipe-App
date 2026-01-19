@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -44,6 +45,7 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
+      debugPrint('signUpWithEmail Firestore error: $e');
       throw 'An error occurred. Please try again.';
     }
   }

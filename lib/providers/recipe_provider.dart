@@ -75,6 +75,13 @@ class RecipeProvider extends ChangeNotifier {
     }
   }
 
+  // Convenience: reload favorites for the currently signed-in user
+  Future<void> loadFavoritesForCurrentUser() async {
+    final userId = _authService.currentUserId;
+    if (userId == null) return;
+    await loadUserFavorites(userId);
+  }
+
   // Toggle favorite with Firestore sync
   Future<void> toggleFavorite(String recipeID) async {
     final userId = _authService.currentUserId;

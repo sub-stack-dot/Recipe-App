@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/recipe_provider.dart';
+import '../services/auth_service.dart';
 import 'signin.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool obscurePassword = true;
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: _loading ? null : _handleReset,
                     child: const Text(
                       'Forgot Password?',
                       style: TextStyle(color: Colors.grey, fontSize: 13),
@@ -111,33 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 12),
                 _PrimaryButton(
                   label: 'Log In',
-                  onPressed: () {
-                    if (emailController.text.isNotEmpty &&
-                        passwordController.text.isNotEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Login Successful!'),
-                          backgroundColor: Colors.green,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                      Future.delayed(const Duration(seconds: 1), () {
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/home',
-                          (route) => false,
-                        );
-                      });
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please fill in all fields'),
-                          backgroundColor: Colors.red,
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: _loading ? null : _handleLogin,
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -211,6 +189,58 @@ class _LoginScreenState extends State<LoginScreen> {
     passwordController.dispose();
     super.dispose();
   }
+
+  Future<void> _handleLogin() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showSnack('Please fill in all fields', Colors.red);
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      final auth = AuthService();
+      final user = await auth.signInWithEmail(email: email, password: password);
+      if (user != null && mounted) {
+        await context.read<RecipeProvider>().loadFavoritesForCurrentUser();
+        _showSnack('Login successful!', Colors.green);
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+    } catch (e) {
+      _showSnack(e.toString(), Colors.red);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handleReset() async {
+    final email = emailController.text.trim();
+    if (email.isEmpty) {
+      _showSnack('Enter your email to reset password', Colors.red);
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      await AuthService().resetPassword(email);
+      _showSnack('Reset email sent. Check your inbox.', Colors.green);
+    } catch (e) {
+      _showSnack(e.toString(), Colors.red);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _showSnack(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 }
 
 class _FrostedField extends StatelessWidget {
@@ -260,7 +290,7 @@ class _PrimaryButton extends StatelessWidget {
   const _PrimaryButton({required this.label, required this.onPressed});
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
